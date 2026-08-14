@@ -1,0 +1,14 @@
+body {
+  font-family: serif;
+  line-height: 1.55;
+  margin: 5%;
+}
+h1 {
+  break-before: page;
+  font-weight: normal;
+  text-align: center;
+  margin: 28% 0 3em;
+}
+p { margin: 0; text-indent: 1.25em; }
+h1 + p { text-indent: 0; }
+h1 + p::first-letter { font-size: 2.8em; float: left; line-height: .8; margin-right: .08em; }

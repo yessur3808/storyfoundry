@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../utils/paths';
+---
+
+<BaseLayout title="Page not found — Storyfoundry">
+  <section class="not-found" data-pagefind-ignore>
+    <p class="eyebrow">404 · Lost page</p>
+    <h1>This chapter wandered<br /><em>off the map.</em></h1>
+    <p>The page may have moved, or perhaps it was never written.</p>
+    <a class="button primary" href={withBase('/library/')}>Return to the library <span>→</span></a>
+  </section>
+</BaseLayout>

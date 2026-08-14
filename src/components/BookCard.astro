@@ -1,0 +1,23 @@
+---
+import BookCover from './BookCover.astro';
+import { withBase } from '../utils/paths';
+
+const { book, chapterCount = 0 } = Astro.props;
+---
+
+<article class="book-card">
+  <a href={withBase(`/library/${book.id}/`)} class="book-card-cover" aria-label={`Open ${book.data.title}`}>
+    <BookCover title={book.data.title} author={book.data.author} accent={book.data.accent} compact />
+  </a>
+  <div class="book-card-copy">
+    <div class="eyebrow-row">
+      <span>{book.data.status}</span>
+      {chapterCount > 0 && <span>{chapterCount} chapters</span>}
+    </div>
+    <h2><a href={withBase(`/library/${book.id}/`)}>{book.data.title}</a></h2>
+    <p>{book.data.description}</p>
+    <div class="tag-row">
+      {book.data.genre.map((genre: string) => <span>{genre}</span>)}
+    </div>
+  </div>
+</article>

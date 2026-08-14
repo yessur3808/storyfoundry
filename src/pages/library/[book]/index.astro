@@ -1,0 +1,66 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BookCover from '../../../components/BookCover.astro';
+import { chapterPath, withBase } from '../../../utils/paths';
+
+export async function getStaticPaths() {
+  const books = await getCollection('books');
+  const chapters = await getCollection('chapters', ({ data }) => !data.draft);
+  return books.map((book) => ({
+    params: { book: book.id },
+    props: { book, chapters: chapters.filter((c) => c.data.book === book.id).sort((a, b) => a.data.order - b.data.order) },
+  }));
+}
+
+const { book, chapters } = Astro.props;
+const firstChapter = chapters[0];
+const totalWords = chapters.reduce((total: number, chapter: any) => total + chapter.body.trim().split(/\s+/).length, 0);
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Book',
+  name: book.data.title,
+  description: book.data.description,
+  author: { '@type': 'Person', name: book.data.author },
+  genre: book.data.genre,
+  bookFormat: 'EBook',
+};
+---
+
+<BaseLayout title={`${book.data.title} — Storyfoundry`} description={book.data.description} type="book">
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  <section class="book-hero" data-pagefind-body>
+    <div class="book-hero-cover"><BookCover title={book.data.title} author={book.data.author} accent={book.data.accent} /></div>
+    <div class="book-hero-copy">
+      <p class="eyebrow">{book.data.status} · {book.data.genre.join(' / ')}</p>
+      <h1>{book.data.title}</h1>
+      {book.data.subtitle && <p class="book-subtitle">{book.data.subtitle}</p>}
+      <p class="large-copy">{book.data.description}</p>
+      <p class="byline">Written by <strong>{book.data.author}</strong></p>
+      <div class="button-row">
+        {firstChapter && <a class="button primary" href={chapterPath(book.id, firstChapter.id)}>Start reading <span>→</span></a>}
+        {chapters.length > 0 && <a class="button quiet" href={withBase(`/downloads/${book.data.downloadSlug}.epub`)} download>Download EPUB</a>}
+        {chapters.length > 0 && <a class="text-download" href={withBase(`/downloads/${book.data.downloadSlug}.pdf`)} download>PDF ↓</a>}
+      </div>
+      <div class="book-stats"><span><strong>{chapters.length}</strong> chapters</span><span><strong>{totalWords.toLocaleString()}</strong> words published</span></div>
+    </div>
+  </section>
+
+  <section class="toc-section" data-pagefind-body>
+    <div class="section-heading"><div><p class="eyebrow">Table of contents</p><h2>Published chapters</h2></div></div>
+    {chapters.length ? (
+      <ol class="chapter-list">
+        {chapters.map((chapter: any) => (
+          <li>
+            <a href={chapterPath(book.id, chapter.id)}>
+              <span class="chapter-index">{String(chapter.data.order).padStart(2, '0')}</span>
+              <span><strong>{chapter.data.title}</strong><small>{chapter.data.description}</small></span>
+              <time datetime={chapter.data.published.toISOString()}>{chapter.data.published.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}</time>
+              <span class="chapter-arrow">→</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    ) : <div class="empty-state"><p>There are no chapters here yet.</p><a href={withBase('/rss.xml')}>Follow the RSS feed for updates.</a></div>}
+  </section>
+</BaseLayout>

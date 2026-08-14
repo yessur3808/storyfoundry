@@ -1,0 +1,26 @@
+---
+import { getCollection, render } from 'astro:content';
+import ReaderLayout from '../../../layouts/ReaderLayout.astro';
+
+export async function getStaticPaths() {
+  const books = await getCollection('books');
+  const chapters = await getCollection('chapters', ({ data }) => !data.draft);
+  return chapters.map((chapter) => {
+    const book = books.find((candidate) => candidate.id === chapter.data.book);
+    const siblings = chapters.filter((item) => item.data.book === chapter.data.book).sort((a, b) => a.data.order - b.data.order);
+    const index = siblings.findIndex((item) => item.id === chapter.id);
+    return {
+      params: { book: chapter.data.book, chapter: chapter.id.split('/').pop() },
+      props: { chapter, book, previous: siblings[index - 1], next: siblings[index + 1] },
+    };
+  });
+}
+
+const { chapter, book, previous, next } = Astro.props;
+const { Content } = await render(chapter);
+const wordCount = (chapter.body ?? '').trim().split(/\s+/).filter(Boolean).length;
+---
+
+<ReaderLayout {chapter} {book} {previous} {next} {wordCount}>
+  <Content />
+</ReaderLayout>

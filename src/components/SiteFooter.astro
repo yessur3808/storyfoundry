@@ -1,0 +1,16 @@
+---
+import { withBase } from '../utils/paths';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer" data-pagefind-ignore>
+  <div>
+    <p class="footer-mark">Storyfoundry</p>
+    <p>Independent stories, made to be kept.</p>
+  </div>
+  <div class="footer-links">
+    <a href={withBase('/rss.xml')}>RSS</a>
+    <a href={withBase('/about/')}>About</a>
+    <span>© {year}</span>
+  </div>
+</footer>

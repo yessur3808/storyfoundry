@@ -1,0 +1,64 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { chapterPath, withBase } from '../utils/paths';
+
+const { chapter, book, previous, next, wordCount } = Astro.props;
+const readingMinutes = Math.max(1, Math.round(wordCount / 230));
+const bookUrl = withBase(`/library/${book.id}/`);
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Chapter',
+  name: chapter.data.title,
+  position: chapter.data.order,
+  datePublished: chapter.data.published.toISOString(),
+  isPartOf: {
+    '@type': 'Book',
+    name: book.data.title,
+    author: { '@type': 'Person', name: book.data.author },
+  },
+};
+---
+
+<BaseLayout title={`${chapter.data.title} — ${book.data.title}`} description={chapter.data.description} type="article">
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  <div class="reading-progress" aria-hidden="true"><span data-reading-progress></span></div>
+  <article class="reader-shell" data-pagefind-body>
+    <header class="chapter-header">
+      <a class="back-link" href={bookUrl}>← {book.data.title}</a>
+      <p class="chapter-number">Chapter {chapter.data.order}</p>
+      <h1>{chapter.data.title}</h1>
+      <p class="chapter-deck">{chapter.data.description}</p>
+      <div class="chapter-meta">
+        <span>{readingMinutes} min read</span>
+        <span>{wordCount.toLocaleString()} words</span>
+        <time datetime={chapter.data.published.toISOString()}>{chapter.data.published.toLocaleDateString('en', { month: 'long', day: 'numeric', year: 'numeric' })}</time>
+      </div>
+    </header>
+    <div class="prose">
+      <slot />
+    </div>
+    <nav class="chapter-nav" aria-label="Chapter navigation">
+      {previous ? (
+        <a href={chapterPath(book.id, previous.id)} class="chapter-nav-link previous">
+          <span>Previous</span><strong>{previous.data.title}</strong>
+        </a>
+      ) : <span></span>}
+      {next ? (
+        <a href={chapterPath(book.id, next.id)} class="chapter-nav-link next">
+          <span>Next</span><strong>{next.data.title}</strong>
+        </a>
+      ) : (
+        <a href={bookUrl} class="chapter-nav-link next"><span>End of preview</span><strong>Back to the book</strong></a>
+      )}
+    </nav>
+  </article>
+  <script>
+    const bar = document.querySelector<HTMLElement>('[data-reading-progress]');
+    const updateProgress = () => {
+      const height = document.documentElement.scrollHeight - window.innerHeight;
+      if (bar) bar.style.width = `${height > 0 ? (window.scrollY / height) * 100 : 0}%`;
+    };
+    updateProgress();
+    document.addEventListener('scroll', updateProgress, { passive: true });
+  </script>
+</BaseLayout>

@@ -1,0 +1,84 @@
+media:
+  input: public/images
+  output: /images
+
+content:
+  - name: books
+    label: Books
+    type: collection
+    path: src/content/books
+    format: json
+    filename:
+      template: "{primary}.json"
+      field: create
+    view:
+      primary: title
+      fields: [title, status, author]
+      sort: [title, published]
+    fields:
+      - { name: title, label: Title, type: string, required: true }
+      - { name: subtitle, label: Subtitle, type: string }
+      - { name: author, label: Author, type: string, required: true }
+      - { name: description, label: Description, type: text, required: true }
+      - name: genre
+        label: Genres
+        type: select
+        required: true
+        options:
+          multiple: true
+          values: [Science Fiction, Fantasy, Mystery, Short Fiction, Magical Realism, Literary Fiction, Horror, Romance]
+      - name: status
+        label: Publication status
+        type: select
+        required: true
+        options:
+          values: [Serializing, Complete, Coming soon]
+      - name: published
+        label: Publication date
+        type: date
+        required: true
+        options: { format: yyyy-MM-dd }
+      - { name: featured, label: Feature on homepage, type: boolean, default: false }
+      - { name: accent, label: Cover accent color, type: string, default: "#d86645" }
+      - { name: downloadSlug, label: Download filename, type: string, required: true, pattern: "^[a-z0-9-]+$" }
+
+  - name: chapters
+    label: Chapters
+    type: collection
+    path: src/content/chapters
+    format: yaml-frontmatter
+    subfolders: true
+    filename:
+      template: "{fields.book}/{fields.order}-{primary}.md"
+      field: create
+    view:
+      primary: title
+      fields: [title, book, order, published, draft]
+      sort: [published, order, title]
+      default: { sort: published, order: desc }
+    fields:
+      - { name: title, label: Chapter title, type: string, required: true }
+      - name: book
+        label: Book
+        type: reference
+        required: true
+        options:
+          collection: books
+          value: "{name}"
+          label: "{title}"
+          search: "title,author"
+      - { name: order, label: Chapter number, type: number, required: true }
+      - { name: description, label: Short description, type: text, required: true }
+      - name: published
+        label: Publication date
+        type: date
+        required: true
+        options: { format: yyyy-MM-dd }
+      - { name: draft, label: Keep as draft, type: boolean, default: true }
+      - { name: body, label: Chapter text, type: rich-text, required: true }
+
+settings:
+  content:
+    merge: true
+  commit:
+    message: "content: {action} {filename}"

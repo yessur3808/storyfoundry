@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BookCover from '../components/BookCover.astro';
+import BookCard from '../components/BookCard.astro';
+import { chapterPath, withBase } from '../utils/paths';
+
+const books = await getCollection('books');
+const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf());
+const featured = books.find(({ data }) => data.featured) ?? books[0];
+const featuredChapters = chapters.filter(({ data }) => data.book === featured.id).sort((a, b) => a.data.order - b.data.order);
+const latestChapter = featuredChapters.at(-1);
+---
+
+<BaseLayout>
+  <section class="hero" data-pagefind-ignore>
+    <div class="hero-copy">
+      <p class="eyebrow">Independent serial fiction</p>
+      <h1>Stories made to <em>stay with you.</em></h1>
+      <p class="hero-intro">Read original novels as they unfold. No feeds, no clutter—just a quiet place for stories, with editions you can keep.</p>
+      <div class="button-row">
+        {latestChapter && <a class="button primary" href={chapterPath(featured.id, latestChapter.id)}>Read the latest chapter <span>→</span></a>}
+        <a class="button quiet" href={withBase('/library/')}>Browse the library</a>
+      </div>
+      <div class="hero-note"><span></span> New chapters every Saturday</div>
+    </div>
+    <div class="hero-art">
+      <div class="cover-shadow"></div>
+      <BookCover title={featured.data.title} author={featured.data.author} accent={featured.data.accent} />
+      <div class="edition-note"><strong>{featuredChapters.length}</strong><span>chapters<br />available</span></div>
+    </div>
+  </section>
+
+  <section class="latest-section" data-pagefind-body>
+    <div class="section-heading">
+      <div><p class="eyebrow">Now serializing</p><h2>{featured.data.title}</h2></div>
+      <a href={withBase(`/library/${featured.id}/`)}>View all chapters →</a>
+    </div>
+    <div class="latest-grid">
+      <div class="featured-summary">
+        <p class="large-copy">{featured.data.description}</p>
+        <div class="tag-row">{featured.data.genre.map((genre) => <span>{genre}</span>)}</div>
+      </div>
+      <ol class="chapter-list compact-list">
+        {featuredChapters.slice(-3).reverse().map((chapter) => (
+          <li>
+            <a href={chapterPath(featured.id, chapter.id)}>
+              <span class="chapter-index">{String(chapter.data.order).padStart(2, '0')}</span>
+              <span><strong>{chapter.data.title}</strong><small>{chapter.data.description}</small></span>
+              <span class="chapter-arrow">↗</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="shelf-section" data-pagefind-body>
+    <div class="section-heading"><div><p class="eyebrow">From the shelf</p><h2>More to discover</h2></div></div>
+    <div class="book-grid">
+      {books.map((book) => <BookCard book={book} chapterCount={chapters.filter((c) => c.data.book === book.id).length} />)}
+    </div>
+  </section>
+
+  <section class="manifesto" data-pagefind-ignore>
+    <p class="eyebrow">The promise</p>
+    <blockquote>“The web can still be a place where a story belongs to its reader.”</blockquote>
+    <div class="promise-grid">
+      <div><span>01</span><h3>Read without noise</h3><p>A calm, responsive reading experience with no advertising or algorithmic feed.</p></div>
+      <div><span>02</span><h3>Keep what you love</h3><p>Finished works are available as EPUB and carefully typeset PDF editions.</p></div>
+      <div><span>03</span><h3>Follow at your pace</h3><p>Use RSS for updates, or simply return whenever you are ready for the next chapter.</p></div>
+    </div>
+  </section>
+</BaseLayout>

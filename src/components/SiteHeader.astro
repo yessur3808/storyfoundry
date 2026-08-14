@@ -1,0 +1,27 @@
+---
+import { withBase } from '../utils/paths';
+
+const currentPath = Astro.url.pathname;
+const links = [
+  { href: withBase('/library/'), label: 'Library' },
+  { href: withBase('/search/'), label: 'Search' },
+  { href: withBase('/about/'), label: 'About' },
+];
+---
+
+<header class="site-header" data-pagefind-ignore>
+  <a class="wordmark" href={withBase('/')} aria-label="Storyfoundry home">
+    <span class="wordmark-mark" aria-hidden="true">S</span>
+    <span>Storyfoundry</span>
+  </a>
+  <nav aria-label="Main navigation">
+    {links.map((link) => (
+      <a href={link.href} aria-current={currentPath.startsWith(link.href) ? 'page' : undefined}>
+        {link.label}
+      </a>
+    ))}
+  </nav>
+  <button class="theme-toggle" type="button" aria-label="Switch color theme" data-theme-toggle>
+    <span aria-hidden="true">◐</span>
+  </button>
+</header>

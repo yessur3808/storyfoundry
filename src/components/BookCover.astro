@@ -1,0 +1,18 @@
+---
+interface Props {
+  title: string;
+  author: string;
+  accent?: string;
+  compact?: boolean;
+}
+
+const { title, author, accent = '#d86645', compact = false } = Astro.props;
+---
+
+<div class:list={['book-cover', { compact }]} style={`--cover-accent:${accent}`} aria-label={`Cover of ${title}`}>
+  <div class="cover-orbit orbit-one"></div>
+  <div class="cover-orbit orbit-two"></div>
+  <span class="cover-kicker">A Storyfoundry novel</span>
+  <strong>{title}</strong>
+  <span class="cover-author">{author}</span>
+</div>

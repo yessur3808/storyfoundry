@@ -1,0 +1,23 @@
+{
+  "name": "storyfoundry",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build && pagefind --site dist",
+    "preview": "astro preview",
+    "books:prepare": "node scripts/prepare-manuscripts.mjs",
+    "books:build": "bash scripts/build-books.sh"
+  },
+  "dependencies": {
+    "@astrojs/rss": "latest",
+    "@astrojs/sitemap": "latest",
+    "astro": "latest"
+  },
+  "devDependencies": {
+    "@astrojs/check": "latest",
+    "pagefind": "latest",
+    "typescript": "latest"
+  }
+}

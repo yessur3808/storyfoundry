@@ -1,0 +1,19 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BookCard from '../../components/BookCard.astro';
+
+const books = await getCollection('books');
+const chapters = await getCollection('chapters', ({ data }) => !data.draft);
+---
+
+<BaseLayout title="Library — Storyfoundry" description="Browse original novels and short fiction available to read online and download.">
+  <section class="page-hero" data-pagefind-body>
+    <p class="eyebrow">The library</p>
+    <h1>Find your next<br /><em>elsewhere.</em></h1>
+    <p>Ongoing serials, completed novels, and short fiction—all free to read in your browser.</p>
+  </section>
+  <section class="library-list" data-pagefind-body>
+    {books.map((book) => <BookCard book={book} chapterCount={chapters.filter((c) => c.data.book === book.id).length} />)}
+  </section>
+</BaseLayout>
